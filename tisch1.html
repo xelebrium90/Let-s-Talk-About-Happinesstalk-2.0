@@ -97,6 +97,23 @@ button.enabled {
     color: #357abd;
     margin-top: 10px;
 }
+
+
+        <div class="impulse-progress" id="impulseProgress"></div>
+<div class="impulse-progress-bar">
+    <div class="impulse-progress-fill" id="impulseProgressFill"></div>
+</div>
+
+<div id="content"></div>
+<button id="nextBtn" disabled>Impuls laden...</button>
+
+<div class="timer-container" id="timerContainer">
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="countdown" id="countdown"></div>
+</div>
+    
 </style>
 </head>
 <body>
@@ -155,20 +172,7 @@ function startTimer() {
     }, 100);
 }
 
-    <div class="impulse-progress" id="impulseProgress"></div>
-<div class="impulse-progress-bar">
-    <div class="impulse-progress-fill" id="impulseProgressFill"></div>
-</div>
 
-<div id="content"></div>
-<button id="nextBtn" disabled>Impuls laden...</button>
-
-<div class="timer-container" id="timerContainer">
-    <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-    </div>
-    <div class="countdown" id="countdown"></div>
-</div>
 
 function enableButton() {
     btn.disabled = false;
