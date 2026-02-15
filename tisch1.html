@@ -48,6 +48,31 @@ button.enabled {
     display: none;
 }
 
+.impulse-progress {
+    margin-top: 30px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #357abd;
+}
+
+.impulse-progress-bar {
+    width: 100%;
+    max-width: 300px;
+    height: 6px;
+    background: #d0e4f7;
+    border-radius: 3px;
+    margin: 12px auto;
+    overflow: hidden;
+}
+
+.impulse-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4a90e2, #357abd);
+    width: 0%;
+    transition: width 0.5s ease;
+    border-radius: 3px;
+}
+
 .progress-bar {
     width: 100%;
     max-width: 300px;
@@ -79,6 +104,11 @@ button.enabled {
 <h1>Let's Talk About - Happiness</h1>
 <h2>Tisch 1 – Glück & Erfüllung</h2>
 
+<div class="impulse-progress" id="impulseProgress"></div>
+<div class="impulse-progress-bar">
+    <div class="impulse-progress-fill" id="impulseProgressFill"></div>
+</div>
+
 <div id="content"></div>
 <button id="nextBtn" disabled>Impuls laden...</button>
 
@@ -99,13 +129,21 @@ const lines = [
 ];
 
 let index = 0;
-const delay = 300000; // 5 Minuten in Millisekunden
+const delay = 60000; // 1 Minute in Millisekunden
 const openerDelay = 2000; // 2 Sekunden für den Opener
 const btn = document.getElementById("nextBtn");
 const timerContainer = document.getElementById("timerContainer");
 const progressFill = document.getElementById("progressFill");
 const countdownDisplay = document.getElementById("countdown");
+const impulseProgress = document.getElementById("impulseProgress");
+const impulseProgressFill = document.getElementById("impulseProgressFill");
 let timerInterval;
+
+function updateImpulseProgress() {
+    const progress = (index / lines.length) * 100;
+    impulseProgressFill.style.width = progress + "%";
+    impulseProgress.textContent = `Impuls ${index} von ${lines.length}`;
+}
 
 function startTimer() {
     timerContainer.style.display = "block";
@@ -148,16 +186,17 @@ function nextLine() {
 
         setTimeout(() => div.classList.add("show"), 100);
         index++;
+        updateImpulseProgress();
         btn.disabled = true;
         btn.classList.remove("enabled");
         btn.textContent = "Bitte warten...";
         
-        // Ab dem zweiten Impuls: Timer für 5 Minuten starten
+        // Ab dem zweiten Impuls: Timer für 1 Minute starten
         if(index > 1) {
             startTimer();
             setTimeout(enableButton, delay);
         } else {
-            // Nach dem Opener: Timer ausblenden, Button nach 5 Minuten aktiv
+            // Nach dem Opener: Timer ausblenden, Button nach 1 Minute aktiv
             timerContainer.style.display = "none";
             setTimeout(enableButton, delay);
         }
