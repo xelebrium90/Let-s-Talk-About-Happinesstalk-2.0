@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happiness Talk – Tisch 1</title>
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #eaf4ff;
+    text-align: center;
+    padding: 40px 20px;
+    color: #1f2d3d;
+}
+h1 { margin-bottom: 5px; }
+h2 { font-weight: 400; margin-bottom: 40px; }
+
+.line {
+    margin-top: 30px;
+    font-size: 20px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.8s ease;
+}
+.line.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+button {
+    margin-top: 40px;
+    padding: 12px 24px;
+    font-size: 16px;
+    border: none;
+    background: #1f2d3d;
+    color: white;
+    cursor: pointer;
+    border-radius: 6px;
+    opacity: 0.5;
+}
+button.enabled {
+    opacity: 1;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<h1>Happiness Talk</h1>
+<h2>Tisch 1 – Glück & Erfüllung</h2>
+
+<div id="content"></div>
+<button id="nextBtn" disabled>Impuls laden...</button>
+
+<script>
+const lines = [
+"Glück ist kein Ziel. Es ist eine Art, durch das Leben zu gehen.",
+"Wann hast du dich zuletzt wirklich erfüllt gefühlt?",
+"Welche Entscheidung hat dein Leben positiv verändert?",
+"Was würdest du tun, wenn Scheitern ausgeschlossen wäre?",
+"Mini-Impuls: 60 Sekunden Stille. Denke an einen Moment echter Dankbarkeit."
+];
+
+let index = 0;
+const delay = 8000; // 8 Sekunden Timer
+const btn = document.getElementById("nextBtn");
+
+function enableButton() {
+    btn.disabled = false;
+    btn.classList.add("enabled");
+    btn.textContent = "Nächsten Impuls anzeigen";
+}
+
+function nextLine() {
+    if(index < lines.length) {
+        const div = document.createElement("div");
+        div.className = "line";
+        div.textContent = lines[index];
+        document.getElementById("content").appendChild(div);
+
+setTimeout(() => div.classList.add("show"), 100);
+        index++;
+        btn.disabled = true;
+        btn.classList.remove("enabled");
+        btn.textContent = "Warte einen Moment...";
+        setTimeout(enableButton, delay);
+    } else {
+        btn.style.display = "none";
+    }
+}
+
+btn.addEventListener("click", nextLine);
+setTimeout(enableButton, delay);
+</script>
+
+</body>
+</html>
