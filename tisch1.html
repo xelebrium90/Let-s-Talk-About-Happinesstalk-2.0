@@ -42,6 +42,36 @@ button.enabled {
     opacity: 1;
     cursor: pointer;
 }
+
+.timer-container {
+    margin-top: 20px;
+    display: none;
+}
+
+.progress-bar {
+    width: 100%;
+    max-width: 300px;
+    height: 8px;
+    background: #d0e4f7;
+    border-radius: 4px;
+    margin: 15px auto;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4a90e2, #357abd);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.countdown {
+    font-size: 18px;
+    font-weight: 500;
+    color: #357abd;
+    margin-top: 10px;
+}
 </style>
 </head>
 <body>
@@ -51,6 +81,13 @@ button.enabled {
 
 <div id="content"></div>
 <button id="nextBtn" disabled>Impuls laden...</button>
+
+<div class="timer-container" id="timerContainer">
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="countdown" id="countdown"></div>
+</div>
 
 <script>
 const lines = [
@@ -62,13 +99,43 @@ const lines = [
 ];
 
 let index = 0;
-const delay = 600000; // 8 Sekunden Timer
+const delay = 600000; // 10 Minuten in Millisekunden
 const btn = document.getElementById("nextBtn");
+const timerContainer = document.getElementById("timerContainer");
+const progressFill = document.getElementById("progressFill");
+const countdownDisplay = document.getElementById("countdown");
+let timerInterval;
+
+function startTimer() {
+    timerContainer.style.display = "block";
+    let timeRemaining = delay;
+    
+timerInterval = setInterval(() => {
+        timeRemaining -= 100;
+        
+        // Berechne Fortschritt in Prozent
+        const progress = ((delay - timeRemaining) / delay) * 100;
+        progressFill.style.width = progress + "%";
+        
+        // Berechne verbleibende Zeit in Minuten und Sekunden
+        const minutes = Math.floor(timeRemaining / 60000);
+        const seconds = Math.floor((timeRemaining % 60000) / 1000);
+        
+        countdownDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, "0")} Minuten verbleibend`;
+        
+        if(timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            timerContainer.style.display = "none";
+        }
+    }, 100);
+}
 
 function enableButton() {
     btn.disabled = false;
     btn.classList.add("enabled");
     btn.textContent = "Nächsten Impuls anzeigen";
+    timerContainer.style.display = "none";
+    if(timerInterval) clearInterval(timerInterval);
 }
 
 function nextLine() {
@@ -78,14 +145,16 @@ function nextLine() {
         div.textContent = lines[index];
         document.getElementById("content").appendChild(div);
 
-setTimeout(() => div.classList.add("show"), 100);
+        setTimeout(() => div.classList.add("show"), 100);
         index++;
         btn.disabled = true;
         btn.classList.remove("enabled");
-        btn.textContent = "Warte 10 Minuten...";
+        btn.textContent = "Bitte warten...";
+        startTimer();
         setTimeout(enableButton, delay);
     } else {
         btn.style.display = "none";
+        timerContainer.style.display = "none";
     }
 }
 
