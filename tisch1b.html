@@ -20,7 +20,7 @@ h2 { font-weight: 400; margin-bottom: 40px; }
     font-size: 20px;
     opacity: 0;
     transform: translateY(10px);
-    transition: all 1.8s ease;
+    transition: all 2.8s ease;
 }
 .line.show {
     opacity: 1;
@@ -62,7 +62,7 @@ button.enabled {
     height: 100%;
     background: linear-gradient(90deg, #4a90e2, #357abd);
     width: 0%;
-    transition: width 0.6s ease;
+    transition: width 0.3s ease;
     border-radius: 4px;
 }
 
@@ -76,7 +76,7 @@ button.enabled {
 </head>
 <body>
 
-<h1>Happiness Talk</h1>
+<h1>Let's Talk About - Happiness</h1>
 <h2>Tisch 1 – Glück & Erfüllung</h2>
 
 <div id="content"></div>
@@ -99,7 +99,7 @@ const lines = [
 ];
 
 let index = 0;
-const delay = 60000; // 1 Minuten in Millisekunden
+const delay = 300000; // 5 Minuten in Millisekunden
 const btn = document.getElementById("nextBtn");
 const timerContainer = document.getElementById("timerContainer");
 const progressFill = document.getElementById("progressFill");
@@ -118,8 +118,8 @@ timerInterval = setInterval(() => {
         progressFill.style.width = progress + "%";
         
         // Berechne verbleibende Zeit in Minuten und Sekunden
-        const minutes = Math.floor(timeRemaining / 60000);
-        const seconds = Math.floor((timeRemaining % 60000) / 1000);
+        const minutes = Math.floor(timeRemaining / 300000);
+        const seconds = Math.floor((timeRemaining % 300000) / 1000);
         
         countdownDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, "0")} Minuten verbleibend`;
         
