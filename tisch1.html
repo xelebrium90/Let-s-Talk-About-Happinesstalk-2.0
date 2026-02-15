@@ -97,9 +97,14 @@ button.enabled {
     color: #357abd;
     margin-top: 10px;
 }
+</style>
+</head>
+<body>
 
+<h1>Let's Talk About - Happiness</h1>
+<h2>Tisch 1 – Glück & Erfüllung</h2>
 
-        <div class="impulse-progress" id="impulseProgress"></div>
+<div class="impulse-progress" id="impulseProgress"></div>
 <div class="impulse-progress-bar">
     <div class="impulse-progress-fill" id="impulseProgressFill"></div>
 </div>
@@ -113,14 +118,6 @@ button.enabled {
     </div>
     <div class="countdown" id="countdown"></div>
 </div>
-    
-</style>
-</head>
-<body>
-
-<h1>Let's Talk About - Happiness</h1>
-<h2>Tisch 1 – Glück & Erfüllung</h2>
-
 
 <script>
 const lines = [
@@ -171,8 +168,6 @@ function startTimer() {
         }
     }, 100);
 }
-
-
 
 function enableButton() {
     btn.disabled = false;
