@@ -109,9 +109,9 @@ button.enabled {
 <div id="content"></div>
 <button id="nextBtn" disabled>Impuls laden...</button>
 
-// div class="timer-container" id="timerContainer" 
-   // div class="progress-bar"
-     //   div class="progress-fill" id="progressFill"></div>
+<div class="timer-container" id="timerContainer"> 
+   <div class="progress-bar"
+        <div class="progress-fill" id="progressFill"></div>
     </div>
     <div class="countdown" id="countdown"></div>
 </div>
@@ -194,7 +194,7 @@ function nextLine() {
         btn.textContent = "Bitte warten...";
         
         // Ab dem zweiten Impuls: Timer für 1 Minute starten
-        if(index > 2) {
+        if(index > 1) {
             startTimer();
             setTimeout(enableButton, delay);
         } else {
