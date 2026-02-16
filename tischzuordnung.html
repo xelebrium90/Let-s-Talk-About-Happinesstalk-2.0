@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitzplan-Generator</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #ec4899;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #0f172a;
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card);
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            transition: transform 0.3s ease;
+        }
+
+        h1 { text-align: center; color: var(--primary); margin-bottom: 1.5rem; }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input {
+            flex-grow: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus { border-color: var(--primary); }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        .btn-add { background: var(--success); color: white; }
+        .btn-remove { background: var(--danger); color: white; }
+        .btn-main { background: var(--primary); color: white; width: 100%; margin-top: 20px; }
+        .btn-clear { background: #94a3b8; color: white; width: 100%; margin-top: 10px; }
+        .btn-shuffle { background: var(--secondary); color: white; margin: 20px auto; font-size: 1.1rem; }
+
+        .hidden { display: none; }
+
+        #count-info {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-align: right;
+            margin-top: -5px;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            font-size: 1rem;
+            background: white;
+            margin-bottom: 1rem;
+        }
+
+        /* Tisch-Visualisierung */
+        #result-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 30px;
+        }
+
+        .table-card {
+            padding: 20px;
+            border-radius: 16px;
+            color: white;
+            min-height: 180px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        .table-card h3 { margin: 0 0 15px 0; border-bottom: 1px solid rgba(255,255,255,0.4); padding-bottom: 8px; }
+        .name-list { list-style: none; padding: 0; margin: 0; }
+        .name-list li { background: rgba(255,255,255,0.25); margin: 6px 0; padding: 8px 12px; border-radius: 8px; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div id="step1" class="container">
+        <h1>Gästeliste</h1>
+        <div id="name-container">
+            </div>
+        <p id="count-info">Teilnehmer: 0/20</p>
+        <button class="btn-main" onclick="saveAndNext()">Speichern & Weiter</button>
+        <button class="btn-clear" onclick="clearAll()">Liste löschen</button>
+    </div>
+
+    <div id="step2" class="container hidden">
+        <h1>Tischanzahl</h1>
+        <p style="text-align: center; color: #64748b;">Wie viele Tische sollen belegt werden?</p>
+        <select id="table-select">
+            <option value="1">1 Tisch</option>
+            <option value="2">2 Tische</option>
+            <option value="3">3 Tische</option>
+            <option value="4">4 Tische</option>
+            <option value="5">5 Tische</option>
+        </select>
+        <button class="btn-main" onclick="distributeNames()">Sitzordnung erstellen</button>
+    </div>
+
+    <div id="step3" class="hidden" style="text-align: center; width: 100%;">
+        <h1>Einteilung</h1>
+        <div id="result-area"></div>
+        <button class="btn-shuffle" onclick="distributeNames()">Nochmal mischen 🎲</button>
+        <button class="btn-clear" onclick="location.reload()" style="max-width: 200px; margin: 20px auto;">Zurück zur Liste</button>
+    </div>
+
+    <script>
+        let savedNames = [];
+        const colors = ['#4f46e5', '#ec4899', '#f59e0b', '#10b981', '#8b5cf6'];
+
+        // Initialisierung beim Start
+        window.onload = function() {
+            const stored = localStorage.getItem('guestListNames');
+            if (stored) {
+                savedNames = JSON.parse(stored);
+                renderFieldsFromStorage();
+            } else {
+                addField(); // Starte mit einem leeren Feld
+            }
+        };
+
+        function addField(value = "") {
+            const container = document.getElementById('name-container');
+            const currentFields = container.querySelectorAll('.input-group').length;
+
+            if (currentFields < 20) {
+                const div = document.createElement('div');
+                div.className = 'input-group';
+                
+                // Erster Button ist immer "+", alle weiteren "-"
+                const buttonHtml = currentFields === 0 
+                    ? `<button class="btn-add" onclick="addField()">+</button>`
+                    : `<button class="btn-remove" onclick="removeField(this)">-</button>`;
+
+                div.innerHTML = `
+                    <input type="text" class="name-input" placeholder="Name..." value="${value}">
+                    ${buttonHtml}
+                `;
+                container.appendChild(div);
+                updateCount();
+            }
+        }
+
+        function removeField(btn) {
+            btn.parentElement.remove();
+            updateCount();
+        }
+
+        function updateCount() {
+            const currentFields = document.querySelectorAll('.name-input').length;
+            document.getElementById('count-info').innerText = `Teilnehmer: ${currentFields}/20`;
+        }
+
+        function renderFieldsFromStorage() {
+            const container = document.getElementById('name-container');
+            container.innerHTML = "";
+            savedNames.forEach((name, index) => {
+                addField(name);
+            });
+            if (savedNames.length === 0) addField();
+        }
+
+        function clearAll() {
+            if(confirm("Wirklich alle Namen löschen?")) {
+                localStorage.removeItem('guestListNames');
+                savedNames = [];
+                const container = document.getElementById('name-container');
+                container.innerHTML = "";
+                addField();
+                updateCount();
+            }
+        }
+
+        function saveAndNext() {
+            const inputs = document.querySelectorAll('.name-input');
+            savedNames = Array.from(inputs)
+                .map(i => i.value.trim())
+                .filter(v => v !== "");
+            
+            if (savedNames.length === 0) {
+                alert("Bitte gib mindestens einen Namen ein.");
+                return;
+            }
+
+            // Lokal speichern
+            localStorage.setItem('guestListNames', JSON.stringify(savedNames));
+
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+        }
+
+        function distributeNames() {
+            const tableCount = parseInt(document.getElementById('table-select').value);
+            const resultArea = document.getElementById('result-area');
+            resultArea.innerHTML = "";
+
+            // Zufällig mischen
+            let shuffled = [...savedNames].sort(() => Math.random() - 0.5);
+
+            // Tische erstellen
+            let tables = Array.from({ length: tableCount }, () => []);
+
+            // Gleichmäßig verteilen
+            shuffled.forEach((name, index) => {
+                tables[index % tableCount].push(name);
+            });
+
+            // HTML für Tische bauen
+            tables.forEach((names, i) => {
+                if (names.length > 0) {
+                    const tableDiv = document.createElement('div');
+                    tableDiv.className = 'table-card';
+                    tableDiv.style.backgroundColor = colors[i % colors.length];
+                    
+                    let namesHtml = names.map(n => `<li>${n}</li>`).join('');
+                    tableDiv.innerHTML = `
+                        <h3>Tisch ${i + 1}</h3>
+                        <ul class="name-list">${namesHtml}</ul>
+                    `;
+                    resultArea.appendChild(tableDiv);
+                }
+            });
+
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
