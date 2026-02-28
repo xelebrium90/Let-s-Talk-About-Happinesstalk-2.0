@@ -1,97 +1,32 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Happiness Talk – Tisch 3</title>
-<style>
-body {
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #f7e9f5;
-    text-align: center;
-    padding: 40px 20px;
-    color: #3a1f36;
-}
-h1 { margin-bottom: 5px; }
-h2 { font-weight: 400; margin-bottom: 40px; }
-
-.line {
-    margin-top: 30px;
-    font-size: 20px;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 1.8s ease;
-}
-.line.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-button {
-    margin-top: 40px;
-    padding: 12px 24px;
-    font-size: 16px;
-    border: none;
-    background: #1f2d3d;
-    color: white;
-    cursor: pointer;
-    border-radius: 6px;
-    opacity: 0.5;
-}
-button.enabled {
-    opacity: 1;
-    cursor: pointer;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tisch 3</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-<h1>Happiness Talk</h1>
-<h2>Tisch 3 – Liebe & Beziehungen</h2>
-
-<div id="content"></div>
-<button id="nextBtn" disabled>Impuls laden...</button>
-
-<script>
-const lines = [
-"Beziehungen formen unser Glück stärker als Besitz.",
-"Wann hast du dich zuletzt wirklich gesehen gefühlt?",
-"Was brauchst du, um dich emotional sicher zu fühlen?",
-"Wo hält dich Stolz davon ab, Mähe zuzulassen?",
-"Impuls: Sage heute einer Person ehrlich, was du an ihr schätzt."
-];
-
-let index = 0;
-const delay = 600000; // 8 Sekunden Timer
-const btn = document.getElementById("nextBtn");
-
-function enableButton() {
-    btn.disabled = false;
-    btn.classList.add("enabled");
-    btn.textContent = "Nächsten Impuls anzeigen";
-}
-
-function nextLine() {
-    if(index < lines.length) {
-        const div = document.createElement("div");
-        div.className = "line";
-        div.textContent = lines[index];
-        document.getElementById("content").appendChild(div);
-
-setTimeout(() => div.classList.add("show"), 100);
-        index++;
-        btn.disabled = true;
-        btn.classList.remove("enabled");
-        btn.textContent = "Warte 10 Minuten...";
-        setTimeout(enableButton, delay);
-    } else {
-        btn.style.display = "none";
-    }
-}
-
-btn.addEventListener("click", nextLine);
-setTimeout(enableButton, delay);
-</script>
-
+    <header>
+        <h1>Welcome to Tisch 3</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="tisch1.html">Tisch 1</a></li>
+                <li><a href="tisch2.html">Tisch 2</a></li>
+                <li><a href="tisch3.html">Tisch 3</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Features of Tisch 3</h2>
+            <p>Here are some unique content or texts specific to Tisch 3.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2026 Tisch 3. All rights reserved.</p>
+    </footer>
 </body>
 </html>
