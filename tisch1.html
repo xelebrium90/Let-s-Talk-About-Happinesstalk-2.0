@@ -104,8 +104,6 @@ button.enabled {
 <h1>Let's Talk About - Happiness</h1>
 <h2>Tisch 1 – Glück & Erfüllung</h2>
 
-
-
 <div id="content"></div>
 <button id="nextBtn" disabled>Impuls laden...</button>
 
@@ -116,12 +114,20 @@ button.enabled {
     <div class="countdown" id="countdown"></div>
 </div>
 
-    <div class="impulse-progress" id="impulseProgress"></div>
+<div class="impulse-progress" id="impulseProgress"></div>
 <div class="impulse-progress-bar">
     <div class="impulse-progress-fill" id="impulseProgressFill"></div>
 </div>
 
 <script>
+const password = prompt("Bitte geben Sie das Passwort ein, um fortzufahren:");
+if (password !== "happiness") {
+    alert("Falsches Passwort. Sie haben keinen Zugang zu dieser Seite.");
+    document.body.innerHTML = "";
+} else {
+    alert("Willkommen!");
+}
+
 const lines = [
 "Opener: Glück ist kein Ziel. Es ist eine Art, durch das Leben zu gehen.",
 "Wann hast du dich zuletzt wirklich erfüllt gefühlt?",
@@ -154,16 +160,14 @@ function startTimer() {
     timerInterval = setInterval(() => {
         timeRemaining -= 100;
         
-        // Berechne Fortschritt in Prozent
         const progress = ((delay - timeRemaining) / delay) * 100;
         progressFill.style.width = progress + "%";
         
-        // Berechne verbleibende Zeit in Minuten und Sekunden
         const minutes = Math.floor(timeRemaining / 60000);
         const seconds = Math.floor((timeRemaining % 60000) / 1000);
-        
+
         countdownDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, "0")} Minuten verbleibend`;
-        
+
         if(timeRemaining <= 0) {
             clearInterval(timerInterval);
             timerContainer.style.display = "none";
@@ -192,13 +196,11 @@ function nextLine() {
         btn.disabled = true;
         btn.classList.remove("enabled");
         btn.textContent = "Bitte warten...";
-        
-        // Ab dem zweiten Impuls: Timer für 1 Minute starten
+
         if(index > 1) {
             startTimer();
             setTimeout(enableButton, delay);
         } else {
-            // Nach dem Opener: Timer ausblenden, Button nach 1 Minute aktiv
             timerContainer.style.display = "none";
             setTimeout(enableButton, delay);
         }
@@ -209,8 +211,6 @@ function nextLine() {
 }
 
 btn.addEventListener("click", nextLine);
-
-// Opener nach 2 Sekunden automatisch anzeigen
 setTimeout(nextLine, openerDelay);
 </script>
 
