@@ -53,17 +53,31 @@ button.enabled {
 <button id="nextBtn" disabled>Impuls laden...</button>
 
 <script>
+const password = prompt("Bitte geben Sie das Passwort ein, um fortzufahren:");
+if (password !== "happiness") {
+    alert("Falsches Passwort. Sie haben keinen Zugang zu dieser Seite.");
+    document.body.innerHTML = "";
+} else {
+    alert("Willkommen!");
+}
+
 const lines = [
-"Dein Leben geschieht jetzt - nicht morgen.",
-"Wann warst du das letzte Mal vollkommen im Moment?",
-"Was lenkt dich täglich von dem ab, was dir wirklich wichtig ist?",
-"Was lässt dich Zeit vergessen?",
-"Mini-Übung: Atme 10 Mal bewusst ein und aus. Spüre nur den Atem."
+    "Dein Leben geschieht jetzt - nicht morgen.",
+    "Wann warst du das letzte Mal vollkommen im Moment?",
+    "Was lenkt dich täglich von dem ab, was dir wirklich wichtig ist?",
+    "Was lässt dich Zeit vergessen?",
+    "Mini-Übung: Atme 10 Mal bewusst ein und aus. Spüre nur den Atem."
 ];
 
 let index = 0;
 const delay = 600000; // 10 Minuten Timer
 const btn = document.getElementById("nextBtn");
+
+function updateImpulseProgress() {
+    const progress = (index / lines.length) * 100;
+    impulseProgressFill.style.width = progress + "%";
+    impulseProgress.textContent = `Impuls ${index} von ${lines.length}`;
+}
 
 function enableButton() {
     btn.disabled = false;
@@ -78,11 +92,12 @@ function nextLine() {
         div.textContent = lines[index];
         document.getElementById("content").appendChild(div);
 
-setTimeout(() => div.classList.add("show"), 100);
+        setTimeout(() => div.classList.add("show"), 100);
         index++;
         btn.disabled = true;
         btn.classList.remove("enabled");
-        btn.textContent = "Warte 10 Minuten...";
+        btn.textContent = "Bitte warten...";
+        
         setTimeout(enableButton, delay);
     } else {
         btn.style.display = "none";
