@@ -9,7 +9,6 @@
     --primary: #1f2d3d;
     --accent: #4a90d9;
     --bg-start: #eaf4ff;
-  
     --bg-end: #d6eaff;
     --card: #ffffff;
     --shadow: 0 4px 24px rgba(31,45,61,0.10);
@@ -289,8 +288,7 @@
 
   // ── State ───────────────────────���─────────────────────────────────────
   const DELAY        = 60;          // seconds
-  const RADIUS = Number(ringArc.getAttribute("r"));
-  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+  const CIRCUMFERENCE = 2 * Math.PI * 41; // ≈ 257.6
 
   let index       = 0;
   let tickInterval = null;
@@ -302,7 +300,7 @@
   const statusEl  = document.getElementById("status");
   const contentDiv = document.getElementById("content");
 
-  ringArc.style.strokeDasharray  = `${CIRCUMFERENCE}`;
+  ringArc.style.strokeDasharray  = CIRCUMFERENCE;
   ringArc.style.strokeDashoffset = 0;
 
   // ── Helpers ───────────────────────────────────────────────────────────
