@@ -36,8 +36,8 @@
   }
 
   h2 {
-    font-size: 1.55rem;
-    font-weight: 500;
+    font-size: 1.45rem;
+    font-weight: 400;
     color: #6a8aaa;
     letter-spacing: 0.4px;
   }
@@ -90,7 +90,7 @@
     padding: 13px 22px;
     font-size: 1rem;
     font-weight: 600;
-    text-align: left;
+    text-align: middle;
     letter-spacing: 0.2px;
     margin-top: 6px;
     opacity: 0;
@@ -128,7 +128,7 @@
     height: 96px;
   }
 
-  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring svg { transform: rotate(-90deg) scaleX(-1); }
 
   .ring-bg {
     fill: none;
@@ -146,7 +146,7 @@
   }
 
   .timer-num {
-    visibility: none;
+    display: none;
     position: absolute;
     inset: 0;
     display: flex;
