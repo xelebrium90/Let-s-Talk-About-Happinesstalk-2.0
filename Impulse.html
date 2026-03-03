@@ -90,7 +90,7 @@
     padding: 13px 22px;
     font-size: 1rem;
     font-weight: 600;
-    text-align: left;
+    text-align: center;
     letter-spacing: 0.2px;
     margin-top: 6px;
     opacity: 0;
@@ -128,7 +128,7 @@
     height: 96px;
   }
 
-  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring svg { transform: rotate(-90deg) scaleX(-1); }
 
   .ring-bg {
     fill: none;
@@ -146,15 +146,7 @@
   }
 
   .timer-num {
-    visibility: none;
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--primary);
+    display: none;
   }
 
   /* ── Button ── */
@@ -332,20 +324,22 @@
   }
 
   function startTimer() {
-    let remaining = DELAY;
-    timerNum.textContent = remaining;
+    if (tickInterval) cancelAnimationFrame(tickInterval);
     ringArc.style.strokeDashoffset = 0;
     timerArea.classList.add('active');
     btn.disabled = true;
     btn.classList.remove('ready');
 
-    tickInterval = setInterval(() => {
-      remaining--;
-      timerNum.textContent = remaining;
-      ringArc.style.strokeDashoffset = CIRCUMFERENCE * (1 - remaining / DELAY);
+    const startTime = performance.now();
+    const totalMs = DELAY * 1000;
 
-      if (remaining <= 0) {
-        clearInterval(tickInterval);
+    function tick(now) {
+      const fraction = Math.min(1, (now - startTime) / totalMs);
+      ringArc.style.strokeDashoffset = CIRCUMFERENCE * fraction;
+
+      if (fraction < 1) {
+        tickInterval = requestAnimationFrame(tick);
+      } else {
         timerArea.classList.remove('active');
         if (index < impulses.length) {
           btn.disabled = false;
@@ -354,7 +348,9 @@
           statusEl.textContent = "✓ Alle Impulse wurden angezeigt.";
         }
       }
-    }, 1000);
+    }
+
+    tickInterval = requestAnimationFrame(tick);
   }
 
   function showNext() {
