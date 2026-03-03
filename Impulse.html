@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="de">
-<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,8 +36,8 @@
   }
 
   h2 {
-    font-size: 1.05rem;
-    font-weight: 400;
+    font-size: 1.55rem;
+    font-weight: 500;
     color: #6a8aaa;
     letter-spacing: 0.4px;
   }
@@ -147,6 +146,7 @@
   }
 
   .timer-num {
+    visibility: none;
     position: absolute;
     inset: 0;
     display: flex;
@@ -201,21 +201,12 @@
     color: #7a9ab8;
   }
 </style>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timer Animation</title>
-    <style>
-        .timer-numbers {
-            opacity: 0;
-            pointer-events: none;
-        }
-    </style>
 </head>
 <body>
 
 <header>
   <h1>Let's Talk About - Happiness</h1>
-  <h2>04.03.26</h2>
+  <h2>Ideen & Impulse</h2>
 </header>
 
 <div id="content"></div>
@@ -226,9 +217,7 @@
     <svg width="96" height="96" viewBox="0 0 96 96">
       <circle class="ring-bg" cx="48" cy="48" r="41"/>
       <circle class="ring-arc" id="ringArc" cx="48" cy="48" r="41"/>
-    <svg id="timer" width="200" height="200" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="45" stroke="blue" stroke-width="5" fill="none" />
-</svg>
+    </svg>
     <span class="timer-num" id="timerNum">60</span>
   </div>
 </div>
@@ -363,28 +352,7 @@
           btn.classList.add('ready');
         } else {
           statusEl.textContent = "✓ Alle Impulse wurden angezeigt.";
-    <div class="timer-numbers" id="seconds">00</div>
-
-    <script>
-        let remainingTime = 60; // seconds
-        const timerCircle = document.querySelector('#timer circle');
-        const secondsDisplay = document.getElementById('seconds');
-        const totalLength = 2 * Math.PI * 45;
-        timerCircle.setAttribute('stroke-dasharray', totalLength);
-        let strokeDashoffset = totalLength;
-
-        function updateTimer() {
-            const startTime = performance.now();
-            const interval = setInterval(() => {
-                const currentTime = Math.min((performance.now() - startTime) / 1000, remainingTime);
-                strokeDashoffset = totalLength - (currentTime / remainingTime) * totalLength;
-                timerCircle.setAttribute('stroke-dashoffset', strokeDashoffset);
-                secondsDisplay.textContent = Math.floor(remainingTime - currentTime);
-                if (currentTime >= remainingTime) {
-                    clearInterval(interval);
-                }
-            }, 50);
-}
+        }
       }
     }, 1000);
   }
@@ -409,15 +377,8 @@
       }
     }
   }
-        requestAnimationFrame(function animation() {
-            if (remainingTime > 0) {
-                requestAnimationFrame(animation);
-            }
-        });
 
   btn.addEventListener("click", showNext);
 </script>
-        updateTimer();
-    </script>
 </body>
 </html>
