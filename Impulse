@@ -36,8 +36,8 @@
   }
 
   h2 {
-    font-size: 1.05rem;
-    font-weight: 400;
+    font-size: 1.55rem;
+    font-weight: 500;
     color: #6a8aaa;
     letter-spacing: 0.4px;
   }
@@ -90,7 +90,7 @@
     padding: 13px 22px;
     font-size: 1rem;
     font-weight: 600;
-    text-align: left;
+    text-align: center;
     letter-spacing: 0.2px;
     margin-top: 6px;
     opacity: 0;
@@ -128,7 +128,9 @@
     height: 96px;
   }
 
-  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring svg {
+  transform: rotate(90deg) scaleX(-1);
+  }
 
   .ring-bg {
     fill: none;
@@ -141,19 +143,12 @@
     stroke: var(--accent);
     stroke-width: 7;
     stroke-linecap: round;
-    stroke-dasharray: 283;
+    /*stroke-dasharray: 283;*/
     stroke-dashoffset: 0;
   }
 
   .timer-num {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--primary);
+    display: none;
   }
 
   /* ── Button ── */
@@ -205,7 +200,7 @@
 
 <header>
   <h1>Let's Talk About - Happiness</h1>
-  <h2>04.03.26</h2>
+  <h2>Ideen & Impulse</h2>
 </header>
 
 <div id="content"></div>
@@ -217,7 +212,7 @@
       <circle class="ring-bg" cx="48" cy="48" r="41"/>
       <circle class="ring-arc" id="ringArc" cx="48" cy="48" r="41"/>
     </svg>
-    <span class="timer-num" id="timerNum">60</span>
+    <span class="timer-num" id="timerNum"></span>
   </div>
 </div>
 
@@ -331,20 +326,22 @@
   }
 
   function startTimer() {
-    let remaining = DELAY;
-    timerNum.textContent = remaining;
+    if (tickInterval) cancelAnimationFrame(tickInterval);
     ringArc.style.strokeDashoffset = 0;
     timerArea.classList.add('active');
     btn.disabled = true;
     btn.classList.remove('ready');
 
-    tickInterval = setInterval(() => {
-      remaining--;
-      timerNum.textContent = remaining;
-      ringArc.style.strokeDashoffset = CIRCUMFERENCE * (1 - remaining / DELAY);
+    const startTime = performance.now();
+    const totalMs = DELAY * 1000;
 
-      if (remaining <= 0) {
-        clearInterval(tickInterval);
+    function tick(now) {
+      const fraction = Math.min(1, (now - startTime) / totalMs);
+      ringArc.style.strokeDashoffset = CIRCUMFERENCE * fraction;
+
+      if (fraction < 1) {
+        tickInterval = requestAnimationFrame(tick);
+      } else {
         timerArea.classList.remove('active');
         if (index < impulses.length) {
           btn.disabled = false;
@@ -353,7 +350,9 @@
           statusEl.textContent = "✓ Alle Impulse wurden angezeigt.";
         }
       }
-    }, 1000);
+    }
+
+    tickInterval = requestAnimationFrame(tick);
   }
 
   function showNext() {
