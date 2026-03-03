@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happiness Talk – Tisch 1</title>
+<style>
+  :root {
+    --primary: #1f2d3d;
+    --accent: #4a90d9;
+    --bg-start: #eaf4ff;
+    --bg-end: #d6eaff;
+    --card: #ffffff;
+    --shadow: 0 4px 24px rgba(31,45,61,0.10);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+    background: linear-gradient(145deg, var(--bg-start) 0%, var(--bg-end) 100%);
+    min-height: 100vh;
+    text-align: center;
+    padding: 48px 20px 100px;
+    color: var(--primary);
+  }
+
+  header { margin-bottom: 48px; }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  h2 {
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: #6a8aaa;
+    letter-spacing: 0.4px;
+  }
+
+  #content {
+    max-width: 640px;
+    margin: 0 auto 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .impulse-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 26px;
+    box-shadow: var(--shadow);
+    font-size: 1.08rem;
+    line-height: 1.65;
+    text-align: left;
+    border-left: 4px solid var(--accent);
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .impulse-card.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .category-header {
+    background: var(--primary);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 13px 22px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: left;
+    letter-spacing: 0.2px;
+    margin-top: 6px;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .category-header.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Timer ── */
+  #timer-area {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 8px auto 28px;
+  }
+
+  #timer-area.active { display: flex; }
+
+  .timer-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #7a9ab8;
+  }
+
+  .timer-ring {
+    position: relative;
+    width: 96px;
+    height: 96px;
+  }
+
+  .timer-ring svg { transform: rotate(-90deg); }
+
+  .ring-bg {
+    fill: none;
+    stroke: #d4e8f8;
+    stroke-width: 7;
+  }
+
+  .ring-arc {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 7;
+    stroke-linecap: round;
+    stroke-dasharray: 283;
+    stroke-dashoffset: 0;
+  }
+
+  .timer-num {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  /* ── Button ── */
+  #nextBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 34px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(31,45,61,0.22);
+    transition: background 0.25s, opacity 0.25s, transform 0.1s;
+    letter-spacing: 0.3px;
+  }
+
+  #nextBtn:hover:not(:disabled) {
+    background: #2d4a6e;
+    transform: translateY(-1px);
+  }
+
+  #nextBtn:active:not(:disabled) { transform: translateY(1px); }
+
+  #nextBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(74,144,217,0.5); }
+    70%  { box-shadow: 0 0 0 12px rgba(74,144,217,0); }
+    100% { box-shadow: 0 0 0 0 rgba(74,144,217,0); }
+  }
+
+  #nextBtn.ready { animation: pulse 1.2s ease 2; }
+
+  #status {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: #7a9ab8;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Let's Talk About - Happiness</h1>
+  <h2>04.03.26</h2>
+</header>
+
+<div id="content"></div>
+
+<div id="timer-area">
+  <div class="timer-label">Nächster Impuls in</div>
+  <div class="timer-ring">
+    <svg width="96" height="96" viewBox="0 0 96 96">
+      <circle class="ring-bg" cx="48" cy="48" r="41"/>
+      <circle class="ring-arc" id="ringArc" cx="48" cy="48" r="41"/>
+    </svg>
+    <span class="timer-num" id="timerNum">60</span>
+  </div>
+</div>
+
+<button id="nextBtn">Nächster Impuls</button>
+<div id="status"></div>
+
+<script>
+  // ── Auth ──────────────────────────────────────────────────────────────
+  const passwordKey = 'tisch1-password';
+  const savedPassword = localStorage.getItem(passwordKey);
+  const requiredPassword = "happiness";
+
+  if (savedPassword) {
+    alert("Willkommen!");
+  } else {
+    const userPassword = prompt("Bitte geben Sie das Passwort ein, um fortzufahren:");
+    if (userPassword === requiredPassword) {
+      localStorage.setItem(passwordKey, userPassword);
+      alert("Willkommen!");
+    } else {
+      alert("Falsches Passwort. Sie haben keinen Zugriff auf diese Seite.");
+      document.body.innerHTML = "";
+    }
+  }
+
+  // ── Data ──────────────────────────────────────────────────────────────
+  const impulses = [
+    { type: 'category', text: "🔥 Leid, Emotionen & Verantwortung" },
+    { type: 'impulse', text: "Schmerz ist unvermeidlich – Leiden eine Entscheidung." },
+    { type: 'impulse', text: "Wissen ohne Handeln ist wertlos." },
+    { type: 'impulse', text: "Du bist für deine Wut verantwortlich – oder nicht?" },
+    { type: 'impulse', text: "Denke – bevor Gefühle dein Leben bestimmen." },
+    { type: 'impulse', text: "Akzeptanz ist nicht Schwäche, sondern Stärke." },
+
+    { type: 'category', text: "🌱 Glück, Sinn & Zufriedenheit" },
+    { type: 'impulse', text: "Glück ist Einstellung, kein Ereignis." },
+    { type: 'impulse', text: "Wann bist du wirklich zufrieden – und warum erst dann?" },
+    { type: 'impulse', text: "Sinn erzeugst du selbst, nicht deine Arbeit." },
+    { type: 'impulse', text: "Dankbarkeit verwandelt Niederlagen in Siege." },
+
+    { type: 'category', text: "🔄 Wandel, Vergänglichkeit & Perspektive" },
+    { type: 'impulse', text: "Nichts bleibt – alles verändert sich." },
+    { type: 'impulse', text: "Das Leben ist gerecht, aber selten bequem." },
+    { type: 'impulse', text: "Jede Krise kann ein Geschenk sein – erkennst du es?" },
+    { type: 'impulse', text: "Das Leben lässt sich nicht planen." },
+
+    { type: 'category', text: "🧠 Gewohnheiten & Selbststeuerung" },
+    { type: 'impulse', text: "Gewohnheiten sind unsichtbare Fesseln – bis sie zu schwer werden." },
+    { type: 'impulse', text: "Welche deiner Routinen bringen dich wirklich weiter?" },
+    { type: 'impulse', text: "Deine Gewohnheiten formen dein Schicksal." },
+
+    { type: 'category', text: "❤️ Güte, Liebe & menschliches Verhalten" },
+    { type: 'impulse', text: "Tue Gutes – aber erwarte nichts." },
+    { type: 'impulse', text: "Liebe beginnt immer bei dir selbst." },
+    { type: 'impulse', text: "Schon der Gedanke, zu schaden, schadet dir." },
+    { type: 'impulse', text: "Handle mit Güte – der Rest klärt sich." },
+
+    { type: 'category', text: "🐾 Menschen, Tiere & Moral" },
+    { type: 'impulse', text: "Haben wir wirklich das Recht, Tiere zu töten?" },
+    { type: 'impulse', text: "Warum ist ein Tiger mehr wert als ein Moskito – oder ist er das nicht?" },
+    { type: 'impulse', text: "Mensch und Tier sind näher beieinander als wir glauben." },
+
+    { type: 'category', text: "⌛ Gegenwart & Achtsamkeit" },
+    { type: 'impulse', text: "Die Vergangenheit ist abgeschlossen – du nicht." },
+    { type: 'impulse', text: "Das Leben passiert jetzt." },
+    { type: 'impulse', text: "Je mehr du etwas erzwingst, desto mehr entgleitet es dir." },
+
+    { type: 'category', text: "🌟 Selbstbild, Wille & Identität" },
+    { type: 'impulse', text: "Kann dein freier Wille eine Illusion sein?" },
+    { type: 'impulse', text: "Was bleibt von dir, wenn alles vergeht?" },
+    { type: 'impulse', text: "Dein Inneres entscheidet – der Rest folgt." },
+  ];
+
+  // ── State ─────────────────────────────────────────────────────────────
+  const DELAY        = 60;          // seconds
+  const CIRCUMFERENCE = 2 * Math.PI * 41; // ≈ 257.6
+
+  let index       = 0;
+  let tickInterval = null;
+
+  const btn       = document.getElementById("nextBtn");
+  const timerArea = document.getElementById("timer-area");
+  const ringArc   = document.getElementById("ringArc");
+  const timerNum  = document.getElementById("timerNum");
+  const statusEl  = document.getElementById("status");
+  const contentDiv = document.getElementById("content");
+
+  ringArc.style.strokeDasharray  = CIRCUMFERENCE;
+  ringArc.style.strokeDashoffset = 0;
+
+  // ── Helpers ───────────────────────────────────────────────────────────
+  function addCard(item) {
+    const el = document.createElement("div");
+    el.textContent = item.text;
+    el.className = item.type === 'category' ? 'category-header' : 'impulse-card';
+    contentDiv.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.classList.add('show');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }));
+  }
+
+  function startTimer() {
+    let remaining = DELAY;
+    timerNum.textContent = remaining;
+    ringArc.style.strokeDashoffset = 0;
+    timerArea.classList.add('active');
+    btn.disabled = true;
+    btn.classList.remove('ready');
+
+    tickInterval = setInterval(() => {
+      remaining--;
+      timerNum.textContent = remaining;
+      ringArc.style.strokeDashoffset = CIRCUMFERENCE * (1 - remaining / DELAY);
+
+      if (remaining <= 0) {
+        clearInterval(tickInterval);
+        timerArea.classList.remove('active');
+        if (index < impulses.length) {
+          btn.disabled = false;
+          btn.classList.add('ready');
+        } else {
+          statusEl.textContent = "✓ Alle Impulse wurden angezeigt.";
+        }
+      }
+    }, 1000);
+  }
+
+  function showNext() {
+    if (index >= impulses.length) return;
+
+    const item = impulses[index++];
+    addCard(item);
+
+    if (item.type === 'category') {
+      // Show category header and immediately proceed to the first impulse below it
+      setTimeout(showNext, 500);
+    } else {
+      // Impulse shown – start timer if more remain, otherwise finish
+      if (index < impulses.length) {
+        startTimer();
+      } else {
+        btn.disabled = true;
+        btn.textContent = "Alle Impulse angezeigt";
+        statusEl.textContent = "✓ Alle Impulse wurden angezeigt.";
+      }
+    }
+  }
+
+  btn.addEventListener("click", showNext);
+</script>
+</body>
+</html>
