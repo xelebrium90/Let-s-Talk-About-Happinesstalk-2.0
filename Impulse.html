@@ -151,6 +151,15 @@
     display: none;
   }
 
+  /* ── Counter ── */
+  #counter {
+    margin: 0 auto 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #5f7f9e;
+    letter-spacing: 0.2px;
+  }
+
   /* ── Button ── */
   #nextBtn {
     display: inline-flex;
@@ -215,6 +224,8 @@
     <span class="timer-num" id="timerNum"></span>
   </div>
 </div>
+
+<div id="counter" aria-live="polite"></div>
 
 <button id="nextBtn">Nächster Impuls</button>
 <div id="status"></div>
@@ -281,22 +292,42 @@
     { type: 'impulse', text: "Dein Inneres entscheidet – der Rest folgt.", question: "Frage: Welche inneren Überzeugungen steuern deine äußeren Ergebnisse, ohne dass du es bemerkst?" },
   ];
 
-  // ── State ───────────────────────���─────────────────────────────────────
-  const DELAY        = 60;          // seconds
+  // ── State ─────────────────────────────────────────────────────────────
+  const DELAY         = 60;               // seconds
   const CIRCUMFERENCE = 2 * Math.PI * 41; // ≈ 257.6
 
-  let index       = 0;
+  let index        = 0;
   let tickInterval = null;
 
-  const btn       = document.getElementById("nextBtn");
-  const timerArea = document.getElementById("timer-area");
-  const ringArc   = document.getElementById("ringArc");
-  const timerNum  = document.getElementById("timerNum");
-  const statusEl  = document.getElementById("status");
+  const btn        = document.getElementById("nextBtn");
+  const timerArea  = document.getElementById("timer-area");
+  const ringArc    = document.getElementById("ringArc");
+  const timerNum   = document.getElementById("timerNum");
+  const statusEl   = document.getElementById("status");
   const contentDiv = document.getElementById("content");
+  const counterEl  = document.getElementById("counter");
 
   ringArc.style.strokeDasharray  = CIRCUMFERENCE;
   ringArc.style.strokeDashoffset = 0;
+
+  // ── Counter helpers (Kategorien werden ignoriert) ─────────────────────
+  const totalImpulses = impulses.filter(i => i.type === 'impulse').length;
+
+  function getShownImpulsesCount() {
+    let count = 0;
+    for (let i = 0; i < index; i++) {
+      if (impulses[i].type === 'impulse') count++;
+    }
+    return count;
+  }
+
+  function updateCounter() {
+    const shown = getShownImpulsesCount();
+    const remaining = Math.max(0, totalImpulses - shown);
+    counterEl.textContent = `Angezeigt: ${shown} | Verbleibend: ${remaining} (Gesamt: ${totalImpulses})`;
+  }
+
+  updateCounter();
 
   // ── Helpers ───────────────────────────────────────────────────────────
   function addCard(item) {
@@ -355,6 +386,7 @@
 
     const item = impulses[index++];
     addCard(item);
+    updateCounter();
 
     if (item.type === 'category') {
       // Show category header and immediately proceed to the first impulse below it
