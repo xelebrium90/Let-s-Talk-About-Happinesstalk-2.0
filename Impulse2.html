@@ -251,23 +251,47 @@
 <div id="status"></div>
 
 <script>
-  // ── Auth ─────────────────────────────────────────────────────────────
-  const passwordKey = 'tisch1-password';
-  const savedPassword = localStorage.getItem(passwordKey);
+  // ── Auth (täglich neu, unabhängig von Cookies) ────────────────────────
+  // Hinweis: localStorage ist KEIN Cookie, aber ebenfalls browserseitige Speicherung.
+  // Damit die Abfrage "jeden Tag erneut" erfolgt, merken wir uns nur den Tag der letzten Freischaltung.
   const requiredPassword = "happiness";
+  const authDayKey = "tisch1-auth-day"; // speichert YYYY-MM-DD (lokal)
+  const authOkKey  = "tisch1-auth-ok";  // "1" falls heute freigeschaltet
 
-  if (savedPassword) {
-    alert("Wie schön, dass es dich gibt! :-)");
-  } else {
-    const userPassword = prompt("Bitte geben Sie das Passwort ein, um fortzufahren:");
-    if (userPassword === requiredPassword) {
-      localStorage.setItem(passwordKey, userPassword);
-      alert("Willkommen!");
-    } else {
-      alert("Falsches Passwort. Sie haben keinen Zugriff auf diese Seite.");
-      document.body.innerHTML = "";
-    }
+  function todayLocalYYYYMMDD() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
   }
+
+  (function enforceDailyPassword() {
+    const today = todayLocalYYYYMMDD();
+
+    // Neuer Tag => alte Freischaltung verwerfen (selbst wenn etwas gespeichert ist)
+    if (localStorage.getItem(authDayKey) !== today) {
+      localStorage.setItem(authDayKey, today);
+      localStorage.removeItem(authOkKey);
+    }
+
+    // Wenn heute noch nicht freigeschaltet: immer Passwort abfragen
+    if (localStorage.getItem(authOkKey) !== "1") {
+      const userPassword = prompt("Bitte geben Sie das Passwort ein, um fortzufahren:");
+
+      if (userPassword === requiredPassword) {
+        localStorage.setItem(authOkKey, "1");
+        alert("Willkommen!");
+      } else {
+        alert("Falsches Passwort. Sie haben keinen Zugriff auf diese Seite.");
+        document.body.innerHTML = "";
+        return; // stop further execution
+      }
+    } else {
+      // Optional: kurzes "Welcome back" am selben Tag
+      alert("Wie schön, dass es dich gibt! :-)");
+    }
+  })();
 
   // ── Data ─────────────────────────────────────────────────────────────
   const impulses = [
