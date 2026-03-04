@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happiness Talk – Tisch 1</title>
+<style>
+  :root {
+    --primary: #1f2d3d;
+    --accent: #4a90d9;
+    --bg-start: #eaf4ff;
+    --bg-end: #d6eaff;
+    --card: #ffffff;
+    --shadow: 0 4px 24px rgba(31,45,61,0.10);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+    background: linear-gradient(145deg, var(--bg-start) 0%, var(--bg-end) 100%);
+    min-height: 100vh;
+    text-align: center;
+    padding: 48px 20px 100px;
+    color: var(--primary);
+  }
+
+  header { margin-bottom: 48px; }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  h2 {
+    font-size: 1.55rem;
+    font-weight: 500;
+    color: #6a8aaa;
+    letter-spacing: 0.4px;
+  }
+
+  #content {
+    max-width: 640px;
+    margin: 0 auto 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .impulse-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 26px;
+    box-shadow: var(--shadow);
+    font-size: 1.08rem;
+    line-height: 1.65;
+    text-align: left;
+    border-left: 4px solid var(--accent);
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .impulse-card.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .impulse-question {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(31,45,61,0.10);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: #5f7f9e;
+  }
+
+  .impulse-question strong {
+    color: #3f5f80;
+    font-weight: 600;
+  }
+
+  .category-header {
+    background: var(--primary);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 13px 22px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.2px;
+    margin-top: 6px;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .category-header.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Timer ── */
+  #timer-area {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 8px auto 28px;
+  }
+
+  #timer-area.active { display: flex; }
+
+  .timer-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #7a9ab8;
+  }
+
+  .timer-ring {
+    position: relative;
+    width: 96px;
+    height: 96px;
+  }
+
+  .timer-ring svg {
+    transform: rotate(90deg) scaleX(-1);
+  }
+
+  .ring-bg {
+    fill: none;
+    stroke: #d4e8f8;
+    stroke-width: 7;
+  }
+
+  .ring-arc {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 7;
+    stroke-linecap: round;
+    /*stroke-dasharray: 283;*/
+    stroke-dashoffset: 0;
+  }
+
+  .timer-num {
+    display: none;
+  }
+
+  /* ── Counter ── */
+  #counter {
+    margin: 0 auto 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #5f7f9e;
+    letter-spacing: 0.2px;
+  }
+
+  /* ── Button ── */
+  #nextBtn, #resetBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 34px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(31,45,61,0.22);
+    transition: background 0.25s, opacity 0.25s, transform 0.1s;
+    letter-spacing: 0.3px;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+  }
+
+  #nextBtn:hover:not(:disabled),
+  #resetBtn:hover:not(:disabled) {
+    background: #2d4a6e;
+    transform: translateY(-1px);
+  }
+
+  #nextBtn:active:not(:disabled),
+  #resetBtn:active:not(:disabled) { transform: translateY(1px); }
+
+  #nextBtn:disabled,
+  #resetBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(74,144,217,0.5); }
+    70%  { box-shadow: 0 0 0 12px rgba(74,144,217,0); }
+    100% { box-shadow: 0 0 0 0 rgba(74,144,217,0); }
+  }
+
+  #nextBtn.ready { animation: pulse 1.2s ease 2; }
+
+  #resetBtn {
+    margin-top: 12px;
+    background: #ffffff;
+    color: var(--primary);
+    border: 1px solid rgba(31,45,61,0.18);
+    box-shadow: 0 4px 14px rgba(31,45,61,0.10);
+  }
+
+  #resetBtn:hover:not(:disabled) {
+    background: #f3f8ff;
+  }
+
+  #status {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: #7a9ab8;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Let's Talk About - Happiness</h1>
+  <h2>Ideen & Impulse</h2>
+</header>
+
+<div id="content"></div>
+
+<div id="timer-area">
+  <div class="timer-label">Nächster Impuls in</div>
+  <div class="timer-ring">
+    <svg width="96" height="96" viewBox="0 0 96 96">
+      <circle class="ring-bg" cx="48" cy="48" r="41"/>
+      <circle class="ring-arc" id="ringArc" cx="48" cy="48" r="41"/>
+    </svg>
+    <span class="timer-num" id="timerNum"></span>
+  </div>
+</div>
+
+<div id="counter" aria-live="polite"></div>
+
+<button id="nextBtn">Nächster Impuls</button>
+<button id="resetBtn" type="button">Von vorne anfangen</button>
+<div id="status"></div>
+
+<script>
+  // ── Auth ─────────────────────────────────────────────────────────────
+  const passwordKey = 'tisch1-password';
+  const savedPassword = localStorage.getItem(passwordKey);
+  const requiredPassword = "happiness";
+
+  if (savedPassword) {
+    alert("Willkommen!");
+  } else {
+    const userPassword = prompt("Bitte geben Sie das Passwort ein, um fortzufahren:");
+    if (userPassword === requiredPassword) {
+      localStorage.setItem(passwordKey, userPassword);
+      alert("Willkommen!");
+    } else {
+      alert("Falsches Passwort. Sie haben keinen Zugriff auf diese Seite.");
+      document.body.innerHTML = "";
+    }
+  }
+
+  // ── Data ─────────────────────────────────────────────────────────────
+  const impulses = [
+    { type: 'category', text: "🌱 Glück, Sinn & Zufriedenheit" },
+    { type: 'impulse', text: "Wann bist du wirklich zufrieden – und warum erst dann?", question: "Frage: Welche Bedingungen knüpfst du an deine Zufriedenheit – und wer hat entschieden, dass sie n[...]" },
+    { type: 'impulse', text: "Sinn erzeugst du selbst, nicht deine Arbeit.", question: "Frage: Wenn dein Beruf morgen wegfiele – woher würde dein Leben dann Bedeutung beziehen?" },
+    /*{ type: 'impulse', text: "Dankbarkeit verwandelt Niederlagen in Siege.", question: "Frage: Welche scheinbare Niederlage in deinem Leben erhält im Rückblick einen verborgenen Gewinn?" },*/
+
+    { type: 'category', text: "🔄 Wandel, Vergänglichkeit & Perspektive" },
+    { type: 'impulse', text: "Nichts bleibt – alles verändert sich.", question: "Frage: Wenn alles vergänglich ist – woran solltest du wirklich festhalten?" },
+    { type: 'impulse', text: "Das Leben ist gerecht, aber selten bequem.", question: "Frage: Könnte das, was du als Ungerechtigkeit empfindest, langfristig eine notwendige Lektion sein?" },
+    /*{ type: 'impulse', text: "Jede Krise kann ein Geschenk sein – erkennst du es?", question: "Frage: Welche Krise hat dich stärker gemacht – obwohl du sie damals nur als Belastung gesehen hast[...]" },*/
+    { type: 'impulse', text: "Das Leben lässt sich nicht planen.", question: "Frage: Wie viel Kontrolle brauchst du wirklich – und was würde passieren, wenn du mehr Unsicherheit zulässt?" },
+
+    { type: 'category', text: "🧠 Gewohnheiten & Selbststeuerung" },
+    { type: 'impulse', text: "Gewohnheiten sind unsichtbare Fesseln – bis sie zu schwer werden.", question: "Frage: Welche Gewohnheit wirkt harmlos – bestimmt aber längst dein Verhalten stärker,[...]" },
+
+    { type: 'category', text: "🔥 Leid, Emotionen & Verantwortung" },
+    { type: 'impulse', text: "Wissen ohne Handeln ist wertlos.", question: "Frage: Welches Wissen trägst du bereits in dir, das dein Leben verändern könnte – wenn du es konsequent umsetzen würde[...]" },
+    /*{ type: 'impulse', text: "Du bist für deine Wut verantwortlich – oder nicht?", question: "Frage: Reagierst du aus freier Entscheidung – oder aus unbewussten Mustern, die deine Wut steuern?" },*/
+    { type: 'impulse', text: "Denke – bevor Gefühle dein Leben bestimmen.", question: "Frage: Wann hast du zuletzt impulsiv gehandelt – und welche Konsequenzen hätte bewusstes Innehalten veränd[...]" },
+    { type: 'impulse', text: "Akzeptanz ist nicht Schwäche, sondern Stärke.", question: "Frage: Wo in deinem Leben wehrst du dich gegen etwas Unveränderliches – und kostet dich dieser Widerstand [...]" },
+
+    { type: 'category', text: "❤️ Güte, Liebe & menschliches Verhalten" },
+    { type: 'impulse', text: "Tue Gutes – aber erwarte nichts.", question: "Frage: Wie rein ist deine Motivation, wenn Dank oder Anerkennung ausbleiben?" },
+    /*{ type: 'impulse', text: "Liebe beginnt immer bei dir selbst.", question: "Frage: Würdest du mit einem geliebten Menschen so sprechen, wie du manchmal mit dir selbst sprichst?" },*/
+    { type: 'impulse', text: "Schon der Gedanke, zu schaden, schadet dir.", question: "Frage: Was passiert mit deinem inneren Zustand, wenn du negative Absichten kultivierst?" },
+    /*{ type: 'impulse', text: "Handle mit Güte – der Rest klärt sich.", question: "Frage: Welche Situation in deinem Leben würde sich sofort verändern, wenn du konsequent mit Güte reagieren w�[...]" },*/
+
+    /*{ type: 'category', text: "🐾 Menschen, Tiere & Moral" },
+    { type: 'impulse', text: "Haben wir wirklich das Recht, Tiere zu töten?", question: "Frage: Auf welcher moralischen Grundlage unterscheidest du zwischen notwendiger Handlung und bloßer Gewohnhei[...]" },
+    { type: 'impulse', text: "Warum ist ein Tiger mehr wert als ein Moskito – oder ist er das nicht?", question: "Frage: Bewertest du Leben nach Nützlichkeit, Nähe oder Emotion – und ist dieses [...]" },
+    { type: 'impulse', text: "Mensch und Tier sind näher beieinander als wir glauben.", question: "Frage: Welche Eigenschaften, die du als „menschlich“ bezeichnest, findest du auch im Tierreich w[...]" },*/
+
+    { type: 'category', text: "⌛ Gegenwart & Achtsamkeit" },
+    { type: 'impulse', text: "Das Leben passiert jetzt.", question: "Frage: Wie viel deiner mentalen Energie verbringst du in Zukunftsszenarien oder Erinnerungen statt im aktuellen Moment?" },
+    { type: 'impulse', text: "Je mehr du etwas erzwingst, desto mehr entgleitet es dir.", question: "Frage: Wo erzeugt dein Kontrollbedürfnis genau das Gegenteil dessen, was du erreichen willst?" },
+
+    { type: 'category', text: "🌟 Selbstbild, Wille & Identität" },
+    { type: 'impulse', text: "Kann dein freier Wille eine Illusion sein?", question: "Frage: Wenn deine Entscheidungen von Genetik, Erziehung und Umfeld beeinflusst sind – wo beginnt deine echte Aut[...]" },
+    { type: 'impulse', text: "Was bleibt von dir, wenn alles vergeht?", question: "Frage: Ist deine Identität an Besitz, Rollen und Beziehungen gebunden – oder existiert etwas davon unabhängig?" },
+    { type: 'impulse', text: "Dein Inneres entscheidet – der Rest folgt.", question: "Frage: Welche inneren Überzeugungen steuern deine äußeren Ergebnisse, ohne dass du es bemerkst?" }
+  ];
+
+  // ── Persistenz ────────────────────────────────────────────────────────
+  const progressKey = 'tisch1-impulse-index';
+
+  function loadIndex() {
+    const raw = localStorage.getItem(progressKey);
+    const parsed = raw === null ? 0 : parseInt(raw, 10);
+    if (Number.isFinite(parsed) && parsed >= 0) return Math.min(parsed, impulses.length);
+    return 0;
+  }
+
+  function saveIndex() {
+    localStorage.setItem(progressKey, String(index));
+  }
+
+  function resetProgress() {
+    if (!confirm("Willst du wirklich wieder von vorne anfangen? Der aktuelle Fortschritt wird zurückgesetzt.")) return;
+
+    // stop timer
+    if (tickInterval) cancelAnimationFrame(tickInterval);
+    tickInterval = null;
+
+    // reset state & UI
+    index = 0;
+    saveIndex();
+
+    contentDiv.innerHTML = "";
+    statusEl.textContent = "";
+    btn.disabled = false;
+    btn.textContent = "Nächster Impuls";
+    btn.classList.remove("ready");
+
+    timerArea.classList.remove("active");
+    ringArc.style.strokeDashoffset = 0;
+
+    updateCounter();
+    contentDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── State ────────────────────────────────────────────────────────────
+  const DELAY         = 60;               // seconds
+  const CIRCUMFERENCE = 2 * Math.PI * 41; // ≈ 257.6
+
+  let index        = loadIndex();
+  let tickInterval = null;
+
+  const btn        = document.getElementById("nextBtn");
+  const resetBtn   = document.getElementById("resetBtn");
+  const timerArea  = document.getElementById("timer-area");
+  const ringArc    = document.getElementById("ringArc");
+  const timerNum   = document.getElementById("timerNum");
+  const statusEl   = document.getElementById("status");
+  const contentDiv = document.getElementById("content");
+  const counterEl  = document.getElementById("counter");
+
+  ringArc.style.strokeDasharray  = CIRCUMFERENCE;
+  ringArc.style.strokeDashoffset = 0;
+
+  // ── Counter helpers (Kategorien werden ignoriert) ─────────────────────
+  const totalImpulses = impulses.filter(i => i.type === 'impulse').length;
+
+  function getShownImpulsesCount() {
+    let count = 0;
+    for (let i = 0; i < index; i++) {
+      if (impulses[i].type === 'impulse') count++;
+    }
+    return count;
+  }
+
+  function updateCounter() {
+    const shown = getShownImpulsesCount();
+    const remaining = Math.max(0, totalImpulses - shown);
+    counterEl.textContent = `Angezeigt: ${shown} | Verbleibend: ${remaining} (Gesamt: ${totalImpulses})`;
+  }
+
+  // Beim Laden: bereits angezeigte Karten wiederherstellen
+  function renderProgress() {
+    contentDiv.innerHTML = "";
+    for (let i = 0; i < index; i++) {
+      const item = impulses[i];
+      // direkt sichtbar rendern (ohne Animation/Scroll)
+      const el = document.createElement("div");
+      el.className = item.type === 'category' ? 'category-header show' : 'impulse-card show';
+
+      if (item.type === 'category') {
+        el.textContent = item.text;
+      } else {
+        const q = (item.question || "").replace(/^Frage:\s*/i, "");
+        el.innerHTML = `
+          <div class="impulse-text">${item.text}</div>
+          ${q ? `<div class="impulse-question"><strong>Frage:</strong> ${q}</div>` : ''}
+        `;
+      }
+      contentDiv.appendChild(el);
+    }
+
+    updateCounter();
+
+    if (index >= impulses.length) {
+      btn.disabled = true;
+      btn.textContent = "Alle Impulse angezeigt";
+      statusEl.textContent = "✓ Alle Impulse wurden angezeigt.";
+      timerArea.classList.remove('active');
+    } else {
+      // Keine Sperre beim Reload – User kann direkt weiterklicken
+      btn.disabled = false;
+      btn.textContent = "Nächster Impuls";
+      statusEl.textContent = "";
+      timerArea.classList.remove('active');
+      btn.classList.remove('ready');
+    }
+  }
+
+  renderProgress();
+
+  // ── Helpers ───────────────────────────────────────────────────────────
+  function addCard(item) {
+    const el = document.createElement("div");
+    el.className = item.type === 'category' ? 'category-header' : 'impulse-card';
+
+    if (item.type === 'category') {
+      el.textContent = item.text;
+    } else {
+      const q = (item.question || "").replace(/^Frage:\s*/i, "");
+      el.innerHTML = `
+        <div class="impulse-text">${item.text}</div>
+        ${q ? `<div class="impulse-question"><strong>Frage:</strong> ${q}</div>` : ''}
+      `;
+    }
+
+    contentDiv.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.classList.add('show');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }));
+  }
+
+  function startTimer() {
+    if (tickInterval) cancelAnimationFrame(tickInterval);
+    ringArc.style.strokeDashoffset = 0;
+    timerArea.classList.add('active');
+    btn.disabled = true;
+    btn.classList.remove('ready');
+
+    const startTime = performance.now();
+    const totalMs = DELAY * 1000;
+
+    function tick(now) {
+      const fraction = Math.min(1, (now - startTime) / totalMs);
+      ringArc.style.strokeDashoffset = CIRCUMFERENCE * fraction;
+
+      if (fraction < 1) {
+        tickInterval = requestAnimationFrame(tick);
+      } else {
+        timerArea.classList.remove('active');
+        if (index < impulses.length) {
+          btn.disabled = false;
+          btn.classList.add('ready');
+        } else {
+          statusEl.textContent = "✓ Alle Impulse wurden angezeigt.";
+        }
+      }
+    }
+
+    tickInterval = requestAnimationFrame(tick);
+  }
+
+  function showNext() {
+    if (index >= impulses.length) return;
+
+    const item = impulses[index++];
+    saveIndex();              // Fortschritt speichern
+    addCard(item);
+    updateCounter();
+
+    if (item.type === 'category') {
+      // Show category header and immediately proceed to the first impulse below it
+      setTimeout(showNext, 500);
+    } else {
+      // Impulse shown – start timer if more remain, otherwise finish
+      if (index < impulses.length) {
+        startTimer();
+      } else {
+        btn.disabled = true;
+        btn.textContent = "Alle Impulse angezeigt";
+        statusEl.textContent = "✓ Alle Impulse wurden angezeigt.";
+      }
+    }
+  }
+
+  btn.addEventListener("click", showNext);
+  resetBtn.addEventListener("click", resetProgress);
+</script>
+</body>
+</html>
