@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happiness Talk – Relationships</title>
+<style>
+  :root {
+    --primary: #1f2d3d;
+    --accent: #4a90d9;
+    --bg-start: #eaf4ff;
+    --bg-end: #d6eaff;
+    --card: #ffffff;
+    --shadow: 0 4px 24px rgba(31,45,61,0.10);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+    background: linear-gradient(145deg, var(--bg-start) 0%, var(--bg-end) 100%);
+    min-height: 100vh;
+    text-align: center;
+    padding: 48px 20px 100px;
+    color: var(--primary);
+  }
+
+  header { margin-bottom: 48px; }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  h2 {
+    font-size: 1.55rem;
+    font-weight: 500;
+    color: #6a8aaa;
+    letter-spacing: 0.4px;
+  }
+
+  #content {
+    max-width: 640px;
+    margin: 0 auto 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .impulse-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 26px;
+    box-shadow: var(--shadow);
+    font-size: 1.08rem;
+    line-height: 1.65;
+    text-align: left;
+    border-left: 4px solid var(--accent);
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .impulse-card.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .impulse-question {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(31,45,61,0.10);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: #5f7f9e;
+  }
+
+  .impulse-question strong {
+    color: #3f5f80;
+    font-weight: 600;
+  }
+
+  .category-header {
+    background: var(--primary);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 13px 22px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.2px;
+    margin-top: 6px;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .category-header.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Timer ── */
+  #timer-area {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 8px auto 28px;
+  }
+
+  #timer-area.active { display: flex; }
+
+  .timer-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #7a9ab8;
+  }
+
+  .timer-ring {
+    position: relative;
+    width: 96px;
+    height: 96px;
+  }
+
+  .timer-ring svg {
+    transform: rotate(90deg) scaleX(-1);
+  }
+
+  .ring-bg {
+    fill: none;
+    stroke: #d4e8f8;
+    stroke-width: 7;
+  }
+
+  .ring-arc {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 7;
+    stroke-linecap: round;
+    stroke-dashoffset: 0;
+  }
+
+  .timer-num {
+    display: none;
+  }
+
+  /* ── Counter ── */
+  #counter {
+    margin: 0 auto 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #5f7f9e;
+    letter-spacing: 0.2px;
+  }
+
+  /* ── Button ── */
+  #nextBtn, #resetBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 34px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(31,45,61,0.22);
+    transition: background 0.25s, opacity 0.25s, transform 0.1s;
+    letter-spacing: 0.3px;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+  }
+
+  #nextBtn:hover:not(:disabled),
+  #resetBtn:hover:not(:disabled) {
+    background: #2d4a6e;
+    transform: translateY(-1px);
+  }
+
+  #nextBtn:active:not(:disabled),
+  #resetBtn:active:not(:disabled) { transform: translateY(1px); }
+
+  #nextBtn:disabled,
+  #resetBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(74,144,217,0.5); }
+    70%  { box-shadow: 0 0 0 12px rgba(74,144,217,0); }
+    100% { box-shadow: 0 0 0 0 rgba(74,144,217,0); }
+  }
+
+  #nextBtn.ready { animation: pulse 1.2s ease 2; }
+
+  #resetBtn {
+    margin-top: 12px;
+    background: #ffffff;
+    color: var(--primary);
+    border: 1px solid rgba(31,45,61,0.18);
+    box-shadow: 0 4px 14px rgba(31,45,61,0.10);
+  }
+
+  #resetBtn:hover:not(:disabled) {
+    background: #f3f8ff;
+  }
+
+  #status {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: #7a9ab8;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Let's Talk About - Happiness</h1>
+  <h2>Relationships – Ideen &amp; Impulse</h2>
+</header>
+
+<div id="content"></div>
+
+<div id="timer-area">
+  <div class="timer-label">Nächster Impuls in</div>
+  <div class="timer-ring">
+    <svg width="96" height="96" viewBox="0 0 96 96">
+      <circle class="ring-bg" cx="48" cy="48" r="41"/>
+      <circle class="ring-arc" id="ringArc" cx="48" cy="48" r="41"/>
+    </svg>
+    <span class="timer-num" id="timerNum"></span>
+  </div>
+</div>
+
+<div id="counter" aria-live="polite"></div>
+
+<button id="nextBtn">Nächster Impuls</button>
+<button id="resetBtn" type="button">Von vorne anfangen</button>
+<div id="status"></div>
+
+<script>
+  // ── Auth (täglich neu, unabhängig von Cookies) ────────────────────────
+  const requiredPassword = "happiness";
+  const authDayKey = "relationships-auth-day";
+  const authOkKey  = "relationships-auth-ok";
+
+  function todayLocalYYYYMMDD() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  (function enforceDailyPassword() {
+    const today = todayLocalYYYYMMDD();
+
+    if (localStorage.getItem(authDayKey) !== today) {
+      localStorage.setItem(authDayKey, today);
+      localStorage.removeItem(authOkKey);
+    }
+
+    if (localStorage.getItem(authOkKey) !== "1") {
+      const userPassword = prompt("Bitte geben Sie das Passwort ein, um fortzufahren:");
+
+      if (userPassword === requiredPassword) {
+        localStorage.setItem(authOkKey, "1");
+        alert("Willkommen!");
+      } else {
+        alert("Falsches Passwort. Sie haben keinen Zugriff auf diese Seite.");
+        document.body.innerHTML = "";
+        return;
+      }
+    } else {
+      alert("Wie schön, dass es dich gibt! :-)");
+    }
+  })();
+
+  // ── Data ─────────────────────────────────────────────────────────────
+  const impulses = [
+    { type: 'category', text: "\uD83D\uDC94\u2764\uFE0F Beziehungen \u2013 Fluch & Segen" },
+    {
+      type: 'impulse',
+      text: "Die meisten Menschen suchen ihr Glück in Beziehungen – und leiden gleichzeitig am meisten an ihnen.",
+      question: "Wann haben Beziehungen dich am meisten bereichert – und wann am meisten verletzt? Was hat den Unterschied gemacht?"
+    },
+    {
+      type: 'impulse',
+      text: "\u201EBeziehungen sind weder Fluch noch Segen \u2013 sie sind ein Spiegel. Und die meisten Menschen sind nicht auf das vorbereitet, was sie darin sehen.\u201D",
+      question: "Was hat dir eine Beziehung über dich selbst gezeigt, das du vorher nicht sehen wolltest?"
+    },
+
+    { type: 'category', text: "🔍 Was Liebe wirklich zeigt" },
+    {
+      type: 'impulse',
+      text: "\u201ELiebe macht nicht blind \u2013 sie macht sichtbar, was wir vorher ignoriert haben.\u201D Am Anfang idealisieren wir. Mit der Zeit wird nicht alles schlechter \u2013 sondern klarer sichtbar.",
+      question: "Was hast du am Anfang einer Beziehung idealisiert – und was wurde erst mit der Zeit klar sichtbar?"
+    },
+    {
+      type: 'impulse',
+      text: "\u201EDie meisten Beziehungen scheitern nicht an fehlender Liebe, sondern an fehlender Kompetenz.\u201D Was fehlt? Kommunikation, Konfliktl\u00F6sung, Empathie, Selbstregulation.",
+      question: "Welche Fähigkeit – Kommunikation, Konfliktlösung, Empathie oder Selbstregulation – fehlt dir am meisten in Beziehungen?"
+    },
+
+    { type: 'category', text: "🧩 Was wir wirklich suchen" },
+    {
+      type: 'impulse',
+      text: "\u201EWir suchen in anderen, was wir in uns selbst nicht gel\u00F6st haben.\u201D Unsicherheit \u2192 Best\u00E4tigung. Chaos \u2192 Stabilit\u00E4t. Einsamkeit \u2192 Rettung.",
+      question: "Was hast du zuletzt in einer Beziehung gesucht – Bestätigung, Stabilität oder Rettung? Was sagt das über dich aus?"
+    },
+    {
+      type: 'impulse',
+      text: "\u201EN\u00E4he ist das Sch\u00F6nste \u2013 und das Gef\u00E4hrlichste zugleich.\u201D Je n\u00E4her dir jemand ist, desto gr\u00F6\u00DFer der Einfluss \u2013 positiv wie negativ.",
+      question: "Wie nah lässt du andere wirklich an dich heran – und wo ziehst du die Grenze? Aus welchem Grund?"
+    },
+
+    { type: 'category', text: "📊 Was die Wissenschaft sagt" },
+    {
+      type: 'impulse',
+      text: "Harvard-Studie (75 Jahre, 724 Menschen): Soziale Verbindungen tun uns gut – Einsamkeit tötet. Menschen, die sozial stärker eingebunden sind, sind glücklicher, körperlich gesünder und leben länger.",
+      question: "Wie stark sind deine sozialen Verbindungen heute – und wann hast du zuletzt bewusst in eine Beziehung investiert?"
+    },
+    {
+      type: 'impulse',
+      text: "Es geht nicht um die Anzahl deiner Beziehungen, sondern um ihre Qualität. Beziehungen mit vielen Konflikten sind oft schlimmer als Einsamkeit. Gute, warme Beziehungen schützen Körper und Gehirn.",
+      question: "Welche deiner Beziehungen gibt dir Energie – und welche zieht sie ab? Was tust du damit?"
+    },
+
+    { type: 'category', text: "🌟 Ein gutes Leben" },
+    {
+      type: 'impulse',
+      text: "\u201EDas Leben ist zu kurz f\u00FCr Streit, Entschuldigungen, Bitterkeit und Rechtfertigungen. Es bleibt nur Zeit zu lieben \u2013 und selbst daf\u00FCr, so scheint es, nur ein Augenblick.\u201D (Mark Twain) \u2013 Ein gutes Leben entsteht durch gute Beziehungen.",
+      question: "Was müsstest du heute verändern, um die wichtigsten Beziehungen in deinem Leben zu vertiefen?"
+    }
+  ];
+
+  // ── Persistenz ────────────────────────────────────────────────────────
+  const progressKey = 'relationships-impulse-index';
+
+  function loadIndex() {
+    const raw = localStorage.getItem(progressKey);
+    const parsed = raw === null ? 0 : parseInt(raw, 10);
+    if (Number.isFinite(parsed) && parsed >= 0) return Math.min(parsed, impulses.length);
+    return 0;
+  }
+
+  function saveIndex() {
+    localStorage.setItem(progressKey, String(index));
+  }
+
+  function resetProgress() {
+    if (!confirm("Willst du wirklich wieder von vorne anfangen? Der aktuelle Fortschritt wird zurückgesetzt.")) return;
+
+    if (tickInterval) cancelAnimationFrame(tickInterval);
+    tickInterval = null;
+
+    index = 0;
+    saveIndex();
+
+    contentDiv.innerHTML = "";
+    statusEl.textContent = "";
+    btn.disabled = false;
+    btn.textContent = "Nächster Impuls";
+    btn.classList.remove("ready");
+
+    timerArea.classList.remove("active");
+    ringArc.style.strokeDashoffset = 0;
+
+    updateCounter();
+    contentDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── State ────────────────────────────────────────────────────────────
+  const DELAY         = 60;
+  const CIRCUMFERENCE = 2 * Math.PI * 41;
+
+  let index        = loadIndex();
+  let tickInterval = null;
+
+  const btn        = document.getElementById("nextBtn");
+  const resetBtn   = document.getElementById("resetBtn");
+  const timerArea  = document.getElementById("timer-area");
+  const ringArc    = document.getElementById("ringArc");
+  const timerNum   = document.getElementById("timerNum");
+  const statusEl   = document.getElementById("status");
+  const contentDiv = document.getElementById("content");
+  const counterEl  = document.getElementById("counter");
+
+  ringArc.style.strokeDasharray  = CIRCUMFERENCE;
+  ringArc.style.strokeDashoffset = 0;
+
+  // ── Counter helpers (Kategorien werden ignoriert) ─────────────────────
+  const totalImpulses = impulses.filter(i => i.type === 'impulse').length;
+
+  function getShownImpulsesCount() {
+    let count = 0;
+    for (let i = 0; i < index; i++) {
+      if (impulses[i].type === 'impulse') count++;
+    }
+    return count;
+  }
+
+  function updateCounter() {
+    const shown = getShownImpulsesCount();
+    const remaining = Math.max(0, totalImpulses - shown);
+    counterEl.textContent = `Angezeigt: ${shown} | Verbleibend: ${remaining} (Gesamt: ${totalImpulses})`;
+  }
+
+  function renderProgress() {
+    contentDiv.innerHTML = "";
+    for (let i = 0; i < index; i++) {
+      const item = impulses[i];
+      const el = document.createElement("div");
+      el.className = item.type === 'category' ? 'category-header show' : 'impulse-card show';
+
+      if (item.type === 'category') {
+        el.textContent = item.text;
+      } else {
+        const q = (item.question || "").replace(/^Frage:\s*/i, "");
+        el.innerHTML = `
+          <div class="impulse-text">${item.text}</div>
+          ${q ? `<div class="impulse-question"><strong>Frage:</strong> ${q}</div>` : ''}
+        `;
+      }
+      contentDiv.appendChild(el);
+    }
+
+    updateCounter();
+
+    if (index >= impulses.length) {
+      btn.disabled = true;
+      btn.textContent = "Alle Impulse angezeigt";
+      statusEl.textContent = "✓ Alle Impulse wurden angezeigt.";
+      timerArea.classList.remove('active');
+    } else {
+      btn.disabled = false;
+      btn.textContent = "Nächster Impuls";
+      statusEl.textContent = "";
+      timerArea.classList.remove('active');
+      btn.classList.remove('ready');
+    }
+  }
+
+  renderProgress();
+
+  // ── Helpers ───────────────────────────────────────────────────────────
+  function addCard(item) {
+    const el = document.createElement("div");
+    el.className = item.type === 'category' ? 'category-header' : 'impulse-card';
+
+    if (item.type === 'category') {
+      el.textContent = item.text;
+    } else {
+      const q = (item.question || "").replace(/^Frage:\s*/i, "");
+      el.innerHTML = `
+        <div class="impulse-text">${item.text}</div>
+        ${q ? `<div class="impulse-question"><strong>Frage:</strong> ${q}</div>` : ''}
+      `;
+    }
+
+    contentDiv.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.classList.add('show');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }));
+  }
+
+  function startTimer() {
+    if (tickInterval) cancelAnimationFrame(tickInterval);
+    ringArc.style.strokeDashoffset = 0;
+    timerArea.classList.add('active');
+    btn.disabled = true;
+    btn.classList.remove('ready');
+
+    const startTime = performance.now();
+    const totalMs = DELAY * 1000;
+
+    function tick(now) {
+      const fraction = Math.min(1, (now - startTime) / totalMs);
+      ringArc.style.strokeDashoffset = CIRCUMFERENCE * fraction;
+
+      if (fraction < 1) {
+        tickInterval = requestAnimationFrame(tick);
+      } else {
+        timerArea.classList.remove('active');
+        if (index < impulses.length) {
+          btn.disabled = false;
+          btn.classList.add('ready');
+        } else {
+          statusEl.textContent = "✓ Alle Impulse wurden angezeigt.";
+        }
+      }
+    }
+
+    tickInterval = requestAnimationFrame(tick);
+  }
+
+  function showNext() {
+    if (index >= impulses.length) return;
+
+    const item = impulses[index++];
+    saveIndex();
+    addCard(item);
+    updateCounter();
+
+    if (item.type === 'category') {
+      setTimeout(showNext, 500);
+    } else {
+      if (index < impulses.length) {
+        startTimer();
+      } else {
+        btn.disabled = true;
+        btn.textContent = "Alle Impulse angezeigt";
+        statusEl.textContent = "✓ Alle Impulse wurden angezeigt.";
+      }
+    }
+  }
+
+  btn.addEventListener("click", showNext);
+  resetBtn.addEventListener("click", resetProgress);
+</script>
+</body>
+</html>
